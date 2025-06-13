@@ -38,6 +38,17 @@ app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024 # Limite de 16MB pour les fi
 
 db = SQLAlchemy(app)
 
+# --- Création des tables de la BDD (Déplacé ici pour l'exécution au démarrage sur Render) ---
+# Cette partie s'exécute chaque fois que l'application est chargée (par Gunicorn ou en dev).
+# Cela garantit que db.create_all() est appelé même sans Pre-Deploy Command.
+with app.app_context():
+    db.create_all()
+
+# Crée le dossier 'uploads' dans static/uploads si non existant.
+# Ceci doit aussi être exécuté quand l'application démarre.
+uploads_dir = os.path.join(app.root_path, 'static', 'uploads')
+os.makedirs(uploads_dir, exist_ok=True)
+
 # --- Modèles de Base de Données ---
 
 # Modèle Utilisateur
@@ -81,7 +92,7 @@ def save_picture(picture):
         picture_fn = random_hex + f_ext
         # Construit le chemin absolu pour le dossier d'upload
         upload_path = os.path.join(app.root_path, 'static', 'uploads')
-        os.makedirs(upload_path, exist_ok=True) # Assure que le dossier existe
+        # os.makedirs(upload_path, exist_ok=True) # Déplacé au démarrage de l'app
         picture_path = os.path.join(upload_path, picture_fn)
         picture.save(picture_path)
         return picture_fn
@@ -177,7 +188,6 @@ def delete_item(item_id):
 
     if item.image_file and item.image_file != 'default_item.jpg':
         try:
-            # Utilisation de app.root_path pour construire le chemin
             os.remove(os.path.join(app.root_path, 'static', 'uploads', item.image_file))
         except OSError as e:
             print(f"Erreur lors de la suppression de l'image : {e}")
@@ -308,13 +318,8 @@ def logout():
     return redirect(url_for('index'))
 
 
-# --- Lancement de l'Application ---
+# --- Lancement de l'Application (pour le développement local) ---
 if __name__ == '__main__':
-    # Crée le dossier 'uploads' dans static/uploads si non existant
-    uploads_dir = os.path.join(app.root_path, 'static', 'uploads')
-    os.makedirs(uploads_dir, exist_ok=True)
-    
-    with app.app_context():
-        db.create_all() # Crée les tables de la BDD si elles n'existent pas
-    
+    # Ceci s'exécute uniquement lorsque vous lancez 'python app.py' localement.
+    # Les tâches de création de DB et de dossiers sont déjà gérées au démarrage de l'app pour Render.
     app.run(debug=True)
