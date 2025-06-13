@@ -1,0 +1,111 @@
+/* Styles spécifiques pour les pages de connexion et d'inscription */
+
+.auth-page {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: calc(100vh - 180px);
+    padding: 20px;
+    background-color: var(--background-color);
+}
+
+.auth-container {
+    background-color: #fff;
+    padding: 40px;
+    border-radius: 10px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 450px;
+    text-align: center;
+    margin: 20px;
+}
+
+.auth-container h2 {
+    font-size: 2rem;
+    color: var(--primary-color);
+    margin-bottom: 30px;
+}
+
+.auth-form .form-group {
+    margin-bottom: 20px;
+    text-align: left;
+}
+
+.auth-form label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: var(--text-color);
+}
+
+.auth-form input[type="text"],
+.auth-form input[type="email"],
+.auth-form input[type="password"] {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid var(--border-color); /* Utilisation de la variable border-color */
+    border-radius: 5px;
+    font-size: 1rem;
+    transition: border-color 0.3s ease;
+}
+
+.auth-form input[type="text"]:focus,
+.auth-form input[type="email"]:focus,
+.auth-form input[type="password"]:focus {
+    border-color: var(--primary-color);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(74, 78, 105, 0.2); /* Couleur de shadow basée sur primary-color */
+}
+
+.auth-button {
+    background-color: var(--primary-color);
+    color: var(--light-text-color);
+    padding: 15px 25px;
+    border: none;
+    border-radius: 5px;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    width: 100%;
+    margin-top: 10px;
+    font-weight: bold;
+}
+
+.auth-button:hover {
+    background-color: var(--secondary-color);
+    transform: translateY(-2px);
+}
+
+.auth-switch {
+    margin-top: 25px;
+    font-size: 0.95rem;
+    color: #666;
+}
+
+.auth-switch a {
+    color: var(--primary-color);
+    font-weight: bold;
+    transition: color 0.3s ease;
+}
+
+.auth-switch a:hover {
+    color: var(--secondary-color);
+}
+
+/* Media Queries pour le responsive */
+@media (max-width: 600px) {
+    .auth-container {
+        padding: 30px 20px;
+        margin: 10px;
+    }
+
+    .auth-container h2 {
+        font-size: 1.8rem;
+        margin-bottom: 20px;
+    }
+
+    .auth-button {
+        padding: 12px 20px;
+        font-size: 1rem;
+    }
+}

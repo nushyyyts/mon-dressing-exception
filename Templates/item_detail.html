@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ item.name }} - Mon Dressing d'Exception</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='item-detail.css') }}"> {# Nouveau fichier CSS pour cette page #}
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo">Mon Dressing d'Exception</div>
+            <ul>
+                <li><a href="{{ url_for('index') }}">Accueil</a></li>
+                <li><a href="{{ url_for('explorer') }}">Explorer les Vitrines</a></li>
+                <li><a href="{{ url_for('my_showcase') }}">Ma Vitrine</a></li>
+                {% if session.get('user_id') %} {# Si l'utilisateur est connecté #}
+                    <li><a href="{{ url_for('logout') }}">Se déconnecter</a></li>
+                {% else %}
+                    <li><a href="{{ url_for('login') }}">Se connecter</a></li>
+                    <li><a href="{{ url_for('login', form='register') }}">S'inscrire</a></li>
+                {% endif %}
+            </ul>
+        </nav>
+    </header>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="flash-messages-container">
+                {% for category, message in messages %}
+                    <div class="flash-message alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <main class="item-detail-page">
+        <section class="item-details-container">
+            <div class="item-image-gallery">
+                <img src="{{ url_for('static', filename='uploads/' + item.image_file) }}" alt="{{ item.name }}" class="main-item-image">
+                {# Ici, on pourrait ajouter d'autres images si le modèle Item était modifié pour en supporter plusieurs #}
+            </div>
+            <div class="item-info">
+                <h1>{{ item.name }}</h1>
+                <p class="item-owner">Par : <a href="{{ url_for('user_showcase', username=item.owner.username) }}">{{ item.owner.username }}</a></p>
+                
+                <p class="item-description">{{ item.description }}</p>
+
+                <div class="item-meta">
+                    {% if item.category %}<p><strong>Catégorie:</strong> {{ item.category|capitalize }}</p>{% endif %}
+                    {% if item.year %}<p><strong>Année:</strong> {{ item.year }}</p>{% endif %}
+                    {% if item.condition %}<p><strong>État:</strong> {{ item.condition|capitalize }}</p>{% endif %}
+                    {% if item.is_rare %}<p class="rare-tag">✨ Pièce Rare</p>{% endif %}
+                    <p><strong>Ajouté le:</strong> {{ item.date_added.strftime('%d/%m/%Y') }}</p>
+                </div>
+
+                {# Exemple de section pour les commentaires (à développer plus tard) #}
+                <div class="item-comments-section">
+                    <h3>Commentaires</h3>
+                    <p>Soyez le premier à commenter cet article !</p>
+                    {# Formulaire de commentaire et liste des commentaires ici #}
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 Mon Dressing d'Exception. Tous droits réservés.</p>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vitrine de {{ target_username }} - Mon Dressing d'Exception</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='user-showcase.css') }}">
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo">Mon Dressing d'Exception</div>
+            <ul>
+                <li><a href="{{ url_for('index') }}">Accueil</a></li>
+                <li><a href="{{ url_for('explorer') }}">Explorer les Vitrines</a></li>
+                <li><a href="{{ url_for('my_showcase') }}">Ma Vitrine</a></li>
+                {% if session.get('user_id') %} {# Si l'utilisateur est connecté #}
+                    <li><a href="{{ url_for('logout') }}">Se déconnecter</a></li>
+                {% else %}
+                    <li><a href="{{ url_for('login') }}">Se connecter</a></li>
+                    <li><a href="{{ url_for('login', form='register') }}">S'inscrire</a></li>
+                {% endif %}
+            </ul>
+        </nav>
+    </header>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="flash-messages-container">
+                {% for category, message in messages %}
+                    <div class="flash-message alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <main class="user-showcase-page">
+        <section class="profile-header">
+            <div class="profile-picture-container">
+                <img src="{{ url_for('static', filename='images/profile-placeholder.jpg') }}" alt="Photo de profil de {{ target_username }}" class="profile-picture">
+            </div>
+            <div class="profile-info">
+                <h1>Vitrine de {{ target_username }}</h1>
+                <p class="profile-bio">
+                    Passionné(e) de mode vintage et de pièces uniques. J'aime chiner des trésors oubliés et les partager ici.
+                </p>
+                <div class="profile-stats">
+                    <span><strong>{{ user_items|length }}</strong> Articles</span>
+                    <span><strong>{{ user_rare_items_count }}</strong> Pièces Rares</span>
+                    <span><strong>5.2K</strong> Vues</span>
+                </div>
+            </div>
+        </section>
+
+        <section class="user-items-section">
+            <h2>Collection de {{ target_username }}</h2>
+            <div class="items-grid">
+                {% if user_items %}
+                    {% for item in user_items %}
+                        <div class="item-card">
+                            <img src="{{ url_for('static', filename='uploads/' + item.image_file) }}" alt="{{ item.name }}">
+                            <h3>{{ item.name }}</h3>
+                            <p class="item-details">
+                                {% if item.year %}Année: {{ item.year }} | {% endif %}
+                                {% if item.condition %}État: {{ item.condition }} {% endif %}
+                                {% if item.is_rare %}<br>✨ Pièce Rare {% endif %}
+                            </p>
+                            <a href="{{ url_for('item_detail', item_id=item.id) }}" class="view-item-detail-button">Voir les détails</a> {# LIEN DIRECT VERS DÉTAIL ARTICLE #}
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <p class="no-items-message">Cet utilisateur n'a pas encore ajouté d'articles à sa vitrine.</p>
+                {% endif %}
+            </div>
+            <div class="pagination">
+                <a href="#" class="active">1</a>
+                <a href="#">2</a>
+                <a href="#">Suivant &raquo;</a>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 Mon Dressing d'Exception. Tous droits réservés.</p>
+    </footer>
+
+    <script src="{{ url_for('static', filename='user-showcase.js') }}"></script>
+</body>
+</html>

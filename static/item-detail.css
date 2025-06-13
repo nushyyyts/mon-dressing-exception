@@ -1,0 +1,134 @@
+/* Styles spécifiques pour la page de détail d'un article */
+
+.item-detail-page {
+    padding-top: 40px;
+    padding-bottom: 60px;
+}
+
+.item-details-container {
+    display: flex;
+    flex-wrap: wrap; /* Permet aux éléments de s'empiler sur les petits écrans */
+    gap: 40px;
+    background-color: #fff;
+    padding: 40px;
+    border-radius: 10px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+}
+
+.item-image-gallery {
+    flex: 1; /* Prend l'espace disponible */
+    min-width: 300px; /* Largeur minimale avant de passer à la ligne */
+    text-align: center;
+}
+
+.main-item-image {
+    max-width: 100%;
+    height: auto;
+    max-height: 500px; /* Limite la hauteur de l'image principale */
+    object-fit: contain; /* L'image s'adapte sans être coupée */
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.item-info {
+    flex: 2; /* Prend deux fois plus d'espace que la galerie d'images */
+    min-width: 300px; /* Largeur minimale */
+}
+
+.item-info h1 {
+    font-size: 2.8rem;
+    color: var(--primary-color);
+    margin-bottom: 10px;
+}
+
+.item-owner {
+    font-size: 1.1rem;
+    color: #666;
+    margin-bottom: 20px;
+}
+
+.item-owner a {
+    color: var(--secondary-color);
+    font-weight: bold;
+}
+
+.item-owner a:hover {
+    color: var(--primary-color);
+}
+
+.item-description {
+    font-size: 1.1rem;
+    line-height: 1.8;
+    color: var(--text-color);
+    margin-bottom: 30px;
+}
+
+.item-meta p {
+    font-size: 1rem;
+    margin-bottom: 8px;
+    color: #555;
+}
+
+.item-meta strong {
+    color: var(--primary-color);
+}
+
+.rare-tag {
+    font-weight: bold;
+    color: #8A4F4F; /* Une couleur pour les pièces rares */
+    background-color: var(--accent-color);
+    display: inline-block;
+    padding: 5px 12px;
+    border-radius: 20px;
+    margin-top: 10px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.item-comments-section {
+    margin-top: 40px;
+    padding-top: 30px;
+    border-top: 1px solid var(--border-color);
+}
+
+.item-comments-section h3 {
+    font-size: 1.8rem;
+    color: var(--primary-color);
+    margin-bottom: 20px;
+}
+
+/* Media Queries pour le responsive */
+@media (max-width: 900px) {
+    .item-details-container {
+        flex-direction: column;
+        align-items: center;
+        gap: 20px;
+        padding: 30px;
+    }
+
+    .item-image-gallery,
+    .item-info {
+        min-width: unset; /* Annule la largeur minimale */
+        flex: none; /* Annule le flex-grow */
+        width: 100%;
+        text-align: center; /* Centre le contenu aussi */
+    }
+
+    .item-info h1 {
+        font-size: 2.2rem;
+    }
+
+    .item-owner,
+    .item-description,
+    .item-meta p {
+        font-size: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .item-details-container {
+        padding: 20px;
+    }
+    .item-info h1 {
+        font-size: 1.8rem;
+    }
+}

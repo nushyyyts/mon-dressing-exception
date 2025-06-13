@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Explorer les Vitrines - Mon Dressing d'Exception</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='explorer.css') }}">
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo">Mon Dressing d'Exception</div>
+            <ul>
+                <li><a href="{{ url_for('index') }}">Accueil</a></li>
+                <li><a href="{{ url_for('explorer') }}">Explorer les Vitrines</a></li>
+                <li><a href="{{ url_for('my_showcase') }}">Ma Vitrine</a></li>
+                {% if session.get('user_id') %} {# Si l'utilisateur est connecté #}
+                    <li><a href="{{ url_for('logout') }}">Se déconnecter</a></li>
+                {% else %}
+                    <li><a href="{{ url_for('login') }}">Se connecter</a></li>
+                    <li><a href="{{ url_for('login', form='register') }}">S'inscrire</a></li>
+                {% endif %}
+            </ul>
+        </nav>
+    </header>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="flash-messages-container">
+                {% for category, message in messages %}
+                    <div class="flash-message alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <main class="explorer-page">
+        <section class="page-header">
+            <h1>Toutes les Vitrines</h1>
+            <p>Découvrez les collections de mode uniques de notre communauté.</p>
+        </section>
+
+        <section class="filters-sort">
+            <input type="text" placeholder="Rechercher une vitrine ou un article..." class="search-bar">
+            <select class="sort-by">
+                <option value="recent">Plus récentes</option>
+                <option value="popular">Les plus populaires</option>
+                <option value="az">Nom (A-Z)</option>
+            </select>
+        </section>
+
+        <section class="all-showcases">
+            <div class="showcase-grid">
+                {% if all_users_with_items %}
+                    {% for user in all_users_with_items %}
+                        <div class="showcase-card">
+                            {# Utilisation d'une image de profil par défaut ou de la première image d'article si disponible #}
+                            <img src="{{ url_for('static', filename='images/placeholder3.jpg') }}" alt="Collection de {{ user.username }}">
+                            <h3>{{ user.username }}</h3>
+                            <p>{{ user.items|length }} pièces</p>
+                            <a href="{{ url_for('user_showcase', username=user.username) }}" class="view-button">Voir la vitrine</a>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <p class="no-items-message">Aucune vitrine à explorer pour le moment.</p>
+                {% endif %}
+            </div>
+            <div class="pagination">
+                <a href="#" class="active">1</a>
+                <a href="#">2</a>
+                <a href="#">3</a>
+                <a href="#">Suivant &raquo;</a>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 Mon Dressing d'Exception. Tous droits réservés.</p>
+    </footer>
+
+    {# Script global s'il y en a un, sinon peut être retiré #}
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mon Dressing d'Exception - La Mode à Partager</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo">Mon Dressing d'Exception</div>
+            <ul>
+                <li><a href="{{ url_for('index') }}">Accueil</a></li>
+                <li><a href="{{ url_for('explorer') }}">Explorer les Vitrines</a></li>
+                <li><a href="{{ url_for('login') }}">Se connecter</a></li>
+                <li><a href="{{ url_for('login', form='register') }}">S'inscrire</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="flash-messages-container">
+                {% for category, message in messages %}
+                    <div class="flash-message alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <main>
+        <section class="hero-section" style="background-image: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url('{{ url_for('static', filename='images/hero-bg.jpg') }}');">
+            <h1>Découvrez et Partagez vos Trésors de Mode</h1>
+            <p>Le lieu idéal pour les collectionneurs et passionnés de pièces rares.</p>
+            <button onclick="location.href='{{ url_for('login', form='register') }}'">Rejoignez la Communauté</button>
+        </section>
+
+        <section class="featured-showcases">
+            <h2>Vitrines du Moment</h2>
+            <div class="showcase-grid">
+                {% if featured_showcases %}
+                    {% for user in featured_showcases %}
+                        <div class="showcase-card">
+                            {# Placeholder pour l'image de profil de l'utilisateur, ou sa première image d'article #}
+                            <img src="{{ url_for('static', filename='images/placeholder1.jpg') }}" alt="Collection de {{ user.username }}">
+                            <h3>{{ user.username }}</h3>
+                            <p>{{ user.items|length }} pièces</p> {# Affiche le nombre d'articles de cet utilisateur #}
+                            <a href="{{ url_for('user_showcase', username=user.username) }}" class="view-button">Voir la vitrine</a>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <p class="no-items-message">Aucune vitrine n'est mise en avant pour le moment.</p>
+                {% endif %}
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 Mon Dressing d'Exception. Tous droits réservés.</p>
+    </footer>
+
+    {# Script global s'il y en a un, sinon peut être retiré #}
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

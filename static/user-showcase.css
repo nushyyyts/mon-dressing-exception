@@ -1,0 +1,135 @@
+/* Styles spécifiques pour la page Vitrine d'un Utilisateur */
+
+.user-showcase-page {
+    padding-top: 40px;
+    padding-bottom: 60px;
+}
+
+.profile-header {
+    background-color: #fff;
+    padding: 40px;
+    border-radius: 10px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+    margin-bottom: 50px;
+    display: flex;
+    align-items: center;
+    gap: 40px;
+}
+
+.profile-picture-container {
+    flex-shrink: 0;
+}
+
+.profile-picture {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 5px solid var(--secondary-color);
+    box-shadow: 0 0 0 5px rgba(74, 78, 105, 0.1); /* Couleur de shadow basée sur primary-color */
+}
+
+.profile-info {
+    flex-grow: 1;
+}
+
+.profile-info h1 {
+    font-size: 2.8rem;
+    color: var(--primary-color);
+    margin-bottom: 10px;
+}
+
+.profile-bio {
+    font-size: 1.1rem;
+    color: var(--text-color);
+    margin-bottom: 20px;
+    line-height: 1.8;
+}
+
+.profile-stats {
+    display: flex;
+    gap: 30px;
+    font-size: 1rem;
+    color: #666;
+}
+
+.profile-stats strong {
+    color: var(--primary-color);
+    font-size: 1.2rem;
+}
+
+/* User Items Section (réutilise items-grid et item-card de style.css/my-showcase.css) */
+.user-items-section {
+    background-color: #fff;
+    padding: 40px;
+    border-radius: 10px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+    margin-bottom: 50px;
+}
+
+.user-items-section h2 {
+    font-size: 2rem;
+    color: var(--primary-color);
+    margin-bottom: 30px;
+    text-align: center;
+}
+
+.item-card .view-item-detail-button {
+    display: block;
+    background-color: var(--secondary-color);
+    color: var(--light-text-color);
+    padding: 10px 15px;
+    border: none;
+    border-radius: 0 0 10px 10px;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    width: 100%;
+    margin-top: auto;
+}
+
+.item-card .view-item-detail-button:hover {
+    background-color: var(--primary-color);
+}
+
+/* Media Queries */
+@media (max-width: 768px) {
+    .profile-header {
+        flex-direction: column;
+        text-align: center;
+        padding: 30px;
+        gap: 20px;
+    }
+
+    .profile-info h1 {
+        font-size: 2.2rem;
+    }
+
+    .profile-bio {
+        font-size: 1rem;
+    }
+
+    .profile-stats {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .user-items-section {
+        padding: 25px;
+    }
+
+    .user-items-section h2 {
+        font-size: 1.8rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .profile-picture {
+        width: 120px;
+        height: 120px;
+    }
+
+    .profile-info h1 {
+        font-size: 2rem;
+    }
+}
