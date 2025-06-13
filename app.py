@@ -3,21 +3,36 @@ from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 import os
 from datetime import datetime
-import uuid # Pour générer des noms de fichiers uniques
-from werkzeug.utils import secure_filename # Pour sécuriser les noms de fichiers
+import uuid
+from werkzeug.utils import secure_filename
 
 
-app = Flask(__name__)
+# --- Initialisation de l'Application Flask ---
+# Spécifie explicitement le chemin racine de l'application sur Render.
+# Ceci résout les erreurs TemplateNotFound.
+app = Flask(__name__, root_path='/opt/render/project/src')
+
 
 # --- Configuration de l'Application ---
-basedir = os.path.abspath(os.path.dirname(__file__))
+# 'basedir' est maintenant basé sur le root_path de l'application (sur Render, /opt/render/project/src)
+basedir = app.root_path
 
+# Configuration de la base de données SQLite pour Render.
+# Le fichier site.db sera créé dans le répertoire de l'application sur Render.
+# IMPORTANT : Pour une application de production à grande échelle, une BDD externe (PostgreSQL) est recommandée.
+# SQLite sur Render est pour la simplicité, mais les données peuvent être éphémères entre les redémarrages.
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'site.db')
+
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-# CLÉ SECRÈTE : CHANGEZ CELA ABSOLUMENT POUR UNE CHAÎNE LONGUE ET ALÉATOIRE !
-app.config['SECRET_KEY'] = 'UNE_NOUVELLE_CLE_SECRETE_TRES_FORTE_POUR_LA_PRODUCTION'
+
+# CLÉ SECRÈTE : TRÈS IMPORTANT !
+# Pour la production, cette valeur DOIT venir d'une variable d'environnement sur Render.
+# L'exemple ici est une valeur de secours pour le développement ou si la variable d'env n'est pas configurée.
+# Sur Render, ajoutez une variable d'environnement nommée SECRET_KEY avec une valeur longue et aléatoire.
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'CHANGER_CETTE_VALEUR_EN_PRODUCTION_SUR_RENDER')
 
 # Configuration pour les téléchargements de fichiers
+# Le chemin 'static/uploads' est relatif au root_path de l'application.
 app.config['UPLOAD_FOLDER'] = os.path.join(basedir, 'static', 'uploads')
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024 # Limite de 16MB pour les fichiers
 
@@ -64,7 +79,10 @@ def save_picture(picture):
         random_hex = str(uuid.uuid4())[:8]
         _, f_ext = os.path.splitext(picture.filename)
         picture_fn = random_hex + f_ext
-        picture_path = os.path.join(app.root_path, 'static', 'uploads', picture_fn)
+        # Construit le chemin absolu pour le dossier d'upload
+        upload_path = os.path.join(app.root_path, 'static', 'uploads')
+        os.makedirs(upload_path, exist_ok=True) # Assure que le dossier existe
+        picture_path = os.path.join(upload_path, picture_fn)
         picture.save(picture_path)
         return picture_fn
     return None
@@ -159,6 +177,7 @@ def delete_item(item_id):
 
     if item.image_file and item.image_file != 'default_item.jpg':
         try:
+            # Utilisation de app.root_path pour construire le chemin
             os.remove(os.path.join(app.root_path, 'static', 'uploads', item.image_file))
         except OSError as e:
             print(f"Erreur lors de la suppression de l'image : {e}")
@@ -236,7 +255,7 @@ def user_showcase(username):
                            user_rare_items_count=user_rare_items_count)
 
 
-# Route pour la page de détail d'un article - NOUVELLE ROUTE
+# Route pour la page de détail d'un article
 @app.route('/item/<int:item_id>')
 def item_detail(item_id):
     item = Item.query.get_or_404(item_id)
@@ -291,7 +310,11 @@ def logout():
 
 # --- Lancement de l'Application ---
 if __name__ == '__main__':
+    # Crée le dossier 'uploads' dans static/uploads si non existant
+    uploads_dir = os.path.join(app.root_path, 'static', 'uploads')
+    os.makedirs(uploads_dir, exist_ok=True)
+    
     with app.app_context():
-        db.create_all()
+        db.create_all() # Crée les tables de la BDD si elles n'existent pas
     
     app.run(debug=True)
