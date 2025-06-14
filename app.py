@@ -8,18 +8,23 @@ from werkzeug.utils import secure_filename
 
 
 # --- Initialisation de l'Application Flask ---
-# Spécifie explicitement le chemin racine de l'application sur Render.
-# Ceci résout les erreurs TemplateNotFound.
-app = Flask(__name__, root_path='/opt/render/project/src')
+# Définit le chemin racine de l'application de manière conditionnelle.
+# Sur Render, la variable d'environnement 'RENDER' est souvent définie (ou une similaire).
+# Si 'RENDER' est détectée, utilise le chemin spécifique à Render.
+# Sinon, utilise le chemin par défaut (qui sera la racine de ton projet local).
+if os.environ.get('RENDER'):
+    app = Flask(__name__, root_path='/opt/render/project/src')
+else:
+    app = Flask(__name__)
 
 
 # --- Configuration de l'Application ---
-# 'basedir' est maintenant basé sur le root_path de l'application (sur Render, /opt/render/project/src)
+# 'basedir' est maintenant basé sur le root_path de l'application.
 basedir = app.root_path
 
-# Configuration de la base de données SQLite pour Render.
-# Le fichier site.db sera créé dans le répertoire de l'application sur Render.
-# IMPORTANT : Pour une application de production à grande échelle, une BDD externe (PostgreSQL) est recommandée.
+# Configuration de la base de données SQLite.
+# Le fichier site.db sera créé dans le répertoire de l'application.
+# IMPORTANT : Pour une application de production à grande échelle sur Render, une BDD externe (PostgreSQL) est recommandée.
 # SQLite sur Render est pour la simplicité, mais les données peuvent être éphémères entre les redémarrages.
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'site.db')
 
@@ -38,8 +43,8 @@ app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024 # Limite de 16MB pour les fi
 
 db = SQLAlchemy(app)
 
-# --- Création des tables de la BDD (Déplacé ici pour l'exécution au démarrage sur Render) ---
-# Cette partie s'exécute chaque fois que l'application est chargée (par Gunicorn ou en dev).
+# --- Création des tables de la BDD ---
+# Cette partie s'exécute chaque fois que l'application est chargée.
 # Cela garantit que db.create_all() est appelé même sans Pre-Deploy Command.
 with app.app_context():
     db.create_all()
@@ -92,7 +97,6 @@ def save_picture(picture):
         picture_fn = random_hex + f_ext
         # Construit le chemin absolu pour le dossier d'upload
         upload_path = os.path.join(app.root_path, 'static', 'uploads')
-        # os.makedirs(upload_path, exist_ok=True) # Déplacé au démarrage de l'app
         picture_path = os.path.join(upload_path, picture_fn)
         picture.save(picture_path)
         return picture_fn
@@ -106,7 +110,9 @@ def index():
     featured_showcases = []
     seen_users = set()
     for item in featured_items:
-        if item.owner.username not in seen_users:
+        # Vérifie si l'utilisateur a des articles avant de l'ajouter aux vitrines.
+        # S'assure également que l'utilisateur n'est ajouté qu'une seule fois.
+        if item.owner and item.owner.username not in seen_users:
             featured_showcases.append(item.owner)
             seen_users.add(item.owner.username)
         if len(featured_showcases) >= 4:
@@ -117,6 +123,7 @@ def index():
 
 @app.route('/explorer')
 def explorer():
+    # Jointures pour s'assurer que seuls les utilisateurs ayant au moins un article sont affichés
     all_users_with_items = User.query.join(Item).group_by(User.id).all()
     return render_template('explorer.html', all_users_with_items=all_users_with_items)
 
@@ -169,8 +176,8 @@ def my_showcase():
         user_items=user_items,
         total_items_count=len(user_items),
         rare_items_count=rare_items_count,
-        views_count='5.2K',
-        comments_count='32'
+        views_count='5.2K', # Ces valeurs sont statiques, à remplacer par de vraies données plus tard si besoin
+        comments_count='32' # Idem
     )
 
 # Route pour la suppression d'un article
@@ -186,6 +193,7 @@ def delete_item(item_id):
         flash('Vous n\'êtes pas autorisé à supprimer cet article.', 'error')
         return redirect(url_for('my_showcase'))
 
+    # Supprime le fichier image si ce n'est pas l'image par défaut
     if item.image_file and item.image_file != 'default_item.jpg':
         try:
             os.remove(os.path.join(app.root_path, 'static', 'uploads', item.image_file))
@@ -222,6 +230,7 @@ def edit_item(item_id):
 
         image_file = request.files.get('item-image')
         if image_file and image_file.filename != '':
+            # Supprime l'ancienne image si elle n'est pas l'image par défaut
             if item.image_file and item.image_file != 'default_item.jpg':
                 try:
                     os.remove(os.path.join(app.root_path, 'static', 'uploads', item.image_file))
@@ -238,9 +247,12 @@ def edit_item(item_id):
             db.session.rollback()
             flash(f'Erreur lors de la mise à jour de l\'article : {e}', 'error')
 
+    # Si la requête est GET ou qu'il y a une erreur POST, affiche le formulaire de modification
+    # Il est important de passer toutes les données nécessaires au template, comme pour l'ajout.
+    # On passe également 'item_to_edit' pour pré-remplir le formulaire d'édition.
     return render_template('my-showcase.html', 
                            username=item.owner.username, 
-                           item_to_edit=item,
+                           item_to_edit=item, # Cet objet va servir à pré-remplir le formulaire
                            user_items=item.owner.items,
                            total_items_count=len(item.owner.items),
                            rare_items_count=Item.query.filter_by(user_id=item.user_id, is_rare=True).count(),
@@ -321,5 +333,5 @@ def logout():
 # --- Lancement de l'Application (pour le développement local) ---
 if __name__ == '__main__':
     # Ceci s'exécute uniquement lorsque vous lancez 'python app.py' localement.
-    # Les tâches de création de DB et de dossiers sont déjà gérées au démarrage de l'app pour Render.
+    # Les tâches de création de DB et de dossiers sont déjà gérées au démarrage de l'app.
     app.run(debug=True)
