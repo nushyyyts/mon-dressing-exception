@@ -5,14 +5,17 @@ from app import app, db, User, Item # Assurez-vous que User et Item sont import�
 print("Début de l'initialisation de la base de données sur Render...")
 
 # Assurez-vous que le chemin racine est correct pour Render lors de ce script
-# C'est déjà géré dans app.py, mais on le reconfirme ici
+# C'est déjà géré dans app.py, mais on le reconfirme ici pour l'exécution directe via Build Command
 if os.environ.get('RENDER'):
-    app.root_path = '/opt/render/project/src'
+    # Si ce script est exécuté directement sur Render (via Build Command),
+    # app.root_path sera déjà '/opt/render/project/src' si app.py est à jour.
+    # On s'assure juste que la DB est créée au bon endroit.
+    db_path = os.path.join('/opt/render/project/src', 'site.db')
 else:
-    app.root_path = os.path.dirname(os.path.abspath(__file__)) # Pour une exécution locale de ce script
+    # Pour le développement local, la DB sera à la racine du projet
+    db_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'site.db')
 
-# Redéfinit SQLALCHEMY_DATABASE_URI pour être certain qu'il pointe vers le site.db attendu
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(app.root_path, 'site.db')
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + db_path
 
 with app.app_context():
     print("Tentative de création des tables...")
